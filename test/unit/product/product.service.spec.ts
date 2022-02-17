@@ -40,7 +40,7 @@ describe('ProductService', () => {
       const productToCreate: Omit<Product, 'id'> = {
         name: 'some product',
       };
-      jest
+      const spy = jest
         .spyOn(repository, 'save')
         .mockResolvedValue(mockProductEntity as unknown as ProductEntity);
 
@@ -49,6 +49,7 @@ describe('ProductService', () => {
 
       // Assert
       expect(product).toBe(mockProduct);
+      expect(spy).toHaveBeenCalledWith(productToCreate);
     });
   });
 });

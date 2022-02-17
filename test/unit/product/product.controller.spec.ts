@@ -34,13 +34,14 @@ describe('ProductController', () => {
       const createProductDto: CreateProductDto = {
         name: 'some product',
       };
-      jest.spyOn(service, 'create').mockResolvedValue(mockProduct);
+      const spy = jest.spyOn(service, 'create').mockResolvedValue(mockProduct);
 
       // Act
       const product = await controller.create(createProductDto);
 
       // Assert
       expect(product).toBe(mockProduct);
+      expect(spy).toHaveBeenCalledWith(createProductDto);
     });
   });
 });
