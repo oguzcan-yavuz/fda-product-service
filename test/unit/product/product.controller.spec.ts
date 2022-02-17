@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ProductController } from './product.controller';
-import { CreateProductDto } from './dto/create-product.dto';
-import { ProductService } from './product.service';
-import { Product } from './product.model';
+import { ProductController } from '../../../src/product/product.controller';
+import { CreateProductDto } from '../../../src/product/dto/create-product.dto';
+import { ProductService } from '../../../src/product/product.service';
+import { Product } from '../../../src/product/product.model';
 import { mock } from 'ts-mockito';
 
 describe('ProductController', () => {

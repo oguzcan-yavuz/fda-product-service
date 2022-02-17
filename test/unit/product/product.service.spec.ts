@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ProductService } from './product.service';
-import { Product } from './product.model';
-import { ProductRepository } from './product.repository';
+import { ProductService } from '../../../src/product/product.service';
+import { Product } from '../../../src/product/product.model';
+import { ProductRepository } from '../../../src/product/product.repository';
 import { mock } from 'ts-mockito';
-import { ProductEntity } from './product.entity';
+import { ProductEntity } from '../../../src/product/product.entity';
 
 describe('ProductService', () => {
   let service: ProductService;
