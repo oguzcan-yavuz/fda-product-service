@@ -8,6 +8,10 @@ agent:
 blocks:
   - name: Install dependencies
     task:
+      env_vars:
+        - name: NODE_ENV
+          value: test
+
       prologue:
         commands:
           - checkout
@@ -22,8 +26,19 @@ blocks:
             - npm install
             - cache store
 
-  - name: Test
+  - name: Tests
     task:
+      env_vars:
+        - name: NODE_ENV
+          value: test
+
+      prologue:
+        commands:
+          - checkout
+          - nvm use
+          - node --version
+          - npm --version
+
       jobs:
         - name: Lint
           commands:
