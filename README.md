@@ -6,5 +6,3 @@ So we are using that path in the configuration. Another solution would be using 
 I didn't wanted to manage same configurations in two different places. Instead, we need to use TYPEORM env variables and keep an .env file while using the migration commands.
 
 
-- testcontainers configuration needs to be in the working directory, so we change directory while doing integration and e2e tests. So we need to resolve the path of the
-env variables dynamically based on the env

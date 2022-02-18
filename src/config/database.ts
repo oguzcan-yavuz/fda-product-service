@@ -19,17 +19,6 @@ export class TypeOrmConfigService implements TypeOrmOptionsFactory {
     } = process;
     const isTestEnvironment = NODE_ENV === 'test';
 
-    console.debug({
-      NODE_ENV,
-      TYPEORM_CONNECTION,
-      TYPEORM_USERNAME,
-      TYPEORM_PASSWORD,
-      TYPEORM_DATABASE,
-      TYPEORM_HOST,
-      TYPEORM_PORT,
-      isTestEnvironment,
-    });
-
     const configuration: ConnectionOptions = {
       type: TYPEORM_CONNECTION as 'postgres',
       username: TYPEORM_USERNAME,
@@ -44,14 +33,12 @@ export class TypeOrmConfigService implements TypeOrmOptionsFactory {
       synchronize: isTestEnvironment,
       migrationsRun: isTestEnvironment,
       entities: isTestEnvironment
-        ? [path.resolve(__dirname, '../**/*.entity{.ts,.js}')]
+        ? [path.resolve(__dirname, '..', '**', '*.entity{.ts,.js}')]
         : ['dist/**/*.entity{.ts,.js}'],
       migrations: isTestEnvironment
-        ? [path.resolve(__dirname, '../migration/*{.ts,.js}')]
+        ? [path.resolve(__dirname, '..', 'migration', '*{.ts,.js}')]
         : ['dist/migration/*{.ts,.js}'],
     };
-
-    console.debug({ configuration });
 
     return configuration;
   }

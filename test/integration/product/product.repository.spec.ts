@@ -6,18 +6,13 @@ import { getRepository } from 'typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { envVarsSchema } from '../../../src/config/env.schema';
 import { TypeOrmConfigService } from '../../../src/config/database';
-import * as path from 'path';
-import * as appRoot from 'app-root-path';
 
 describe('ProductRepository', () => {
   let repository: ProductRepository;
   let module: TestingModule;
 
   beforeAll(async () => {
-    const envFilePath = path.resolve(
-      appRoot.path,
-      `.env.${process.env.NODE_ENV}`,
-    );
+    const envFilePath = `./.env.${process.env.NODE_ENV}`;
 
     module = await Test.createTestingModule({
       imports: [
