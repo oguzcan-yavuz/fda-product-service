@@ -2,33 +2,30 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ProductRepository } from '../../../src/product/product.repository';
 import { ProductEntity } from '../../../src/product/product.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Product } from '../../../src/product/product.model';
-import { ConnectionOptions, getRepository } from 'typeorm';
+import { getRepository } from 'typeorm';
+import { ConfigModule } from '@nestjs/config';
+import { envVarsSchema } from '../../../src/config/env.schema';
+import { TypeOrmConfigService } from '../../../src/config/database';
+import * as path from 'path';
+import * as appRoot from 'app-root-path';
 
 describe('ProductRepository', () => {
   let repository: ProductRepository;
   let module: TestingModule;
-  const POSTGRES_USER = 'integration-test-user';
-  const POSTGRES_PASSWORD = 'integration-test-pass';
-  const POSTGRES_DB = 'test';
 
   beforeAll(async () => {
-    const dbConfig: ConnectionOptions = {
-      type: 'postgres',
-      host: global.__TESTCONTAINERS_POSTGRES_IP__,
-      port: global.__TESTCONTAINERS_POSTGRES_PORT_5432__,
-      username: POSTGRES_USER,
-      password: POSTGRES_PASSWORD,
-      database: POSTGRES_DB,
-      entities: [ProductEntity],
-      migrations: [__dirname + '../../../src/migrations/*.ts'],
-      migrationsRun: true,
-      synchronize: true,
-    };
+    const envFilePath = path.resolve(
+      appRoot.path,
+      `.env.${process.env.NODE_ENV}`,
+    );
 
     module = await Test.createTestingModule({
       imports: [
-        TypeOrmModule.forRoot({ ...dbConfig, keepConnectionAlive: true }),
+        ConfigModule.forRoot({
+          envFilePath,
+          validationSchema: envVarsSchema,
+        }),
+        TypeOrmModule.forRootAsync({ useClass: TypeOrmConfigService }),
         TypeOrmModule.forFeature([ProductEntity]),
       ],
       providers: [ProductRepository],
@@ -43,7 +40,7 @@ describe('ProductRepository', () => {
 
   describe('create product', () => {
     it('should create a product', async () => {
-      const product: Omit<Product, 'id'> = {
+      const product: Pick<ProductEntity, 'name'> = {
         name: 'test product',
       };
 

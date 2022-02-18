@@ -1,19 +1,21 @@
 import { Module } from '@nestjs/common';
 import { ProductModule } from './product/product.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ProductEntity } from './product/product.entity';
+import { ConfigModule } from '@nestjs/config';
+import { envVarsSchema } from './config/env.schema';
+import { TypeOrmConfigService } from './config/database';
+import * as path from 'path';
+import * as appRoot from 'app-root-path';
+
+const envFilePath = path.resolve(appRoot.path, `.env.${process.env.NODE_ENV}`);
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'root',
-      password: 'root',
-      database: 'postgres',
-      entities: [ProductEntity],
+    ConfigModule.forRoot({
+      envFilePath,
+      validationSchema: envVarsSchema,
     }),
+    TypeOrmModule.forRootAsync({ useClass: TypeOrmConfigService }),
     ProductModule,
   ],
 })

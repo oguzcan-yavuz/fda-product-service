@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ProductService } from '../../../src/product/product.service';
-import { Product } from '../../../src/product/product.model';
 import { ProductRepository } from '../../../src/product/product.repository';
 import { mock } from 'ts-mockito';
 import { ProductEntity } from '../../../src/product/product.entity';
@@ -8,18 +7,14 @@ import { ProductEntity } from '../../../src/product/product.entity';
 describe('ProductService', () => {
   let service: ProductService;
   let repository: ProductRepository;
-  const mockProduct: Product = {
+  const mockProductEntity: Partial<ProductEntity> = {
     id: 1,
     name: 'some product',
-  };
-  const mockProductEntity: Partial<ProductEntity> = {
-    ...mockProduct,
     createdAt: new Date(),
     updatedAt: new Date(),
-    toModel: () => mockProduct,
   };
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ProductService,
@@ -37,7 +32,7 @@ describe('ProductService', () => {
   describe('createProduct()', () => {
     it('should create product and return the product', async () => {
       // Arrange
-      const productToCreate: Omit<Product, 'id'> = {
+      const productToCreate: Pick<ProductEntity, 'name'> = {
         name: 'some product',
       };
       const spy = jest
@@ -48,7 +43,7 @@ describe('ProductService', () => {
       const product = await service.create(productToCreate);
 
       // Assert
-      expect(product).toBe(mockProduct);
+      expect(product).toBe(mockProductEntity);
       expect(spy).toHaveBeenCalledWith(productToCreate);
     });
   });

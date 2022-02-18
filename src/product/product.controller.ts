@@ -1,6 +1,6 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
-import { Product } from './product.model';
+import { ProductEntity } from './product.entity';
 import { ProductService } from './product.service';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 
@@ -13,9 +13,11 @@ export class ProductController {
   @ApiResponse({
     status: 201,
     description: 'Creates a product',
-    type: Product,
+    type: ProductEntity,
   })
-  async create(@Body() createProductDto: CreateProductDto): Promise<Product> {
+  async create(
+    @Body() createProductDto: CreateProductDto,
+  ): Promise<ProductEntity> {
     return this.productService.create(createProductDto);
   }
 }

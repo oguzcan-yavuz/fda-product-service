@@ -2,18 +2,20 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ProductController } from '../../../src/product/product.controller';
 import { CreateProductDto } from '../../../src/product/dto/create-product.dto';
 import { ProductService } from '../../../src/product/product.service';
-import { Product } from '../../../src/product/product.model';
 import { mock } from 'ts-mockito';
+import { ProductEntity } from '../../../src/product/product.entity';
 
 describe('ProductController', () => {
   let controller: ProductController;
   let service: ProductService;
-  const mockProduct: Product = {
+  const mockProductEntity: ProductEntity = {
     id: 1,
     name: 'some product',
+    createdAt: new Date(),
+    updatedAt: new Date(),
   };
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [ProductController],
       providers: [
@@ -34,13 +36,15 @@ describe('ProductController', () => {
       const createProductDto: CreateProductDto = {
         name: 'some product',
       };
-      const spy = jest.spyOn(service, 'create').mockResolvedValue(mockProduct);
+      const spy = jest
+        .spyOn(service, 'create')
+        .mockResolvedValue(mockProductEntity);
 
       // Act
       const product = await controller.create(createProductDto);
 
       // Assert
-      expect(product).toBe(mockProduct);
+      expect(product).toBe(mockProductEntity);
       expect(spy).toHaveBeenCalledWith(createProductDto);
     });
   });
