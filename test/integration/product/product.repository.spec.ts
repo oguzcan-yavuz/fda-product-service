@@ -3,7 +3,7 @@ import { ProductRepository } from '../../../src/product/product.repository';
 import { ProductEntity } from '../../../src/product/product.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Product } from '../../../src/product/product.model';
-import { getRepository } from 'typeorm';
+import { ConnectionOptions, getRepository } from 'typeorm';
 
 describe('ProductRepository', () => {
   let repository: ProductRepository;
@@ -13,19 +13,22 @@ describe('ProductRepository', () => {
   const POSTGRES_DB = 'test';
 
   beforeAll(async () => {
+    const dbConfig: ConnectionOptions = {
+      type: 'postgres',
+      host: global.__TESTCONTAINERS_POSTGRES_IP__,
+      port: global.__TESTCONTAINERS_POSTGRES_PORT_5432__,
+      username: POSTGRES_USER,
+      password: POSTGRES_PASSWORD,
+      database: POSTGRES_DB,
+      entities: [ProductEntity],
+      migrations: [__dirname + '../../../src/migrations/*.ts'],
+      migrationsRun: true,
+      synchronize: true,
+    };
+
     module = await Test.createTestingModule({
       imports: [
-        TypeOrmModule.forRoot({
-          type: 'postgres',
-          host: global.__TESTCONTAINERS_POSTGRES_IP__,
-          port: global.__TESTCONTAINERS_POSTGRES_PORT_5432__,
-          username: POSTGRES_USER,
-          password: POSTGRES_PASSWORD,
-          database: POSTGRES_DB,
-          entities: [ProductEntity],
-          synchronize: true,
-          keepConnectionAlive: true,
-        }),
+        TypeOrmModule.forRoot({ ...dbConfig, keepConnectionAlive: true }),
         TypeOrmModule.forFeature([ProductEntity]),
       ],
       providers: [ProductRepository],

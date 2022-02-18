@@ -21,18 +21,29 @@ describe('ProductController (e2e)', () => {
   });
 
   describe('products', () => {
-    it('/products (POST)', async () => {
-      const dto: CreateProductDto = {
-        name: 'cool product',
-      };
+    describe('/products (POST)', () => {
+      it('should return bad request for empty object', async () => {
+        const dto = {};
 
-      const { body } = await request(app.getHttpServer())
-        .post('/products')
-        .send(dto)
-        .expect(201);
+        const { body } = await request(app.getHttpServer())
+          .post('/products')
+          .send(dto)
+          .expect(400);
+      });
 
-      expect(typeof body.id).toBe('number');
-      expect(body.name).toBe(dto.name);
+      it('should create the product', async () => {
+        const dto: CreateProductDto = {
+          name: 'cool product',
+        };
+
+        const { body } = await request(app.getHttpServer())
+          .post('/products')
+          .send(dto)
+          .expect(201);
+
+        expect(typeof body.id).toBe('number');
+        expect(body.name).toBe(dto.name);
+      });
     });
   });
 });
