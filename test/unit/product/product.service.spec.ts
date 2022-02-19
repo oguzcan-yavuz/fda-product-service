@@ -3,6 +3,7 @@ import { ProductService } from '../../../src/product/product.service';
 import { ProductRepository } from '../../../src/product/product.repository';
 import { mock } from 'ts-mockito';
 import { ProductEntity } from '../../../src/product/product.entity';
+import { getLoggerToken, PinoLogger } from "nestjs-pino";
 
 describe('ProductService', () => {
   let service: ProductService;
@@ -21,6 +22,10 @@ describe('ProductService', () => {
         {
           provide: ProductRepository,
           useValue: mock(ProductRepository),
+        },
+        {
+          provide: getLoggerToken(ProductService.name),
+          useValue: mock(PinoLogger),
         },
       ],
     }).compile();
