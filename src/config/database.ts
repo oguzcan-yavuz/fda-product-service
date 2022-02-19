@@ -2,9 +2,11 @@ import { ConnectionOptions } from 'typeorm';
 import { TypeOrmModuleOptions, TypeOrmOptionsFactory } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
 import * as path from 'path';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
 @Injectable()
 export class TypeOrmConfigService implements TypeOrmOptionsFactory {
+
   createTypeOrmOptions(): Promise<TypeOrmModuleOptions> | TypeOrmModuleOptions {
     const {
       env: {
