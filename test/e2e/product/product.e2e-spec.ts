@@ -4,6 +4,8 @@ import * as request from 'supertest';
 import { AppModule } from '../../../src/app.module';
 import { CreateProductDto } from '../../../src/product/dto/create-product.dto';
 import { ConfigService } from '@nestjs/config';
+import { AllExceptionsFilter } from '../../../src/all-exceptions.filter';
+import { Logger } from 'nestjs-pino';
 
 describe('ProductController (e2e)', () => {
   let app: INestApplication;
@@ -14,11 +16,14 @@ describe('ProductController (e2e)', () => {
       imports: [AppModule],
     }).compile();
 
-    app = moduleFixture.createNestApplication();
+    app = moduleFixture.createNestApplication(null, { bufferLogs: true });
     const configService: ConfigService = app.get(ConfigService);
     prefix = configService.get('URL_PREFIX');
+    const logger = app.get(Logger);
     app.setGlobalPrefix(prefix);
     app.useGlobalPipes(new ValidationPipe());
+    app.useGlobalFilters(new AllExceptionsFilter(logger));
+    app.useLogger(logger);
 
     await app.init();
   });

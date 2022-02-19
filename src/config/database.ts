@@ -6,7 +6,6 @@ import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
 @Injectable()
 export class TypeOrmConfigService implements TypeOrmOptionsFactory {
-
   createTypeOrmOptions(): Promise<TypeOrmModuleOptions> | TypeOrmModuleOptions {
     const {
       env: {
