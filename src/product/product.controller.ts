@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Post, Query } from "@nestjs/common";
 import { CreateProductDto } from './dto/create-product.dto';
 import { ProductEntity } from './product.entity';
 import { ProductService } from './product.service';
@@ -32,5 +32,15 @@ export class ProductController {
     @Query() listProductsDto: ListProductsDto,
   ): Promise<ProductEntity[]> {
     return this.productService.list(listProductsDto);
+  }
+
+  @Get(':id')
+  @ApiResponse({
+    status: 200,
+    description: 'Gets the product',
+    type: ProductEntity,
+  })
+  async get(@Param('id', ParseIntPipe) id: number): Promise<ProductEntity> {
+    return this.productService.get(id);
   }
 }

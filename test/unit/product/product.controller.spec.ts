@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { mock } from 'ts-mockito';
 import { ProductController } from '../../../src/product/product.controller';
 import { CreateProductDto } from '../../../src/product/dto/create-product.dto';
 import { ProductService } from '../../../src/product/product.service';
-import { mock } from 'ts-mockito';
 import { ListProductsDto } from '../../../src/product/dto/list-products.dto';
 import { ProductFactory } from '../../factory/product.factory';
 
@@ -24,6 +24,10 @@ describe('ProductController', () => {
 
     controller = module.get<ProductController>(ProductController);
     service = module.get<ProductService>(ProductService);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   describe('create()', () => {
@@ -60,6 +64,22 @@ describe('ProductController', () => {
       // Assert
       expect(products).toHaveLength(10);
       expect(spy).toHaveBeenCalledWith(listProductsDto);
+    });
+  });
+
+  describe('get()', () => {
+    it('should return the product', async () => {
+      // Arrange
+      const mockProduct = await productFactory.make();
+      const createdProductId = mockProduct.id
+      const spy = jest.spyOn(service, 'get').mockResolvedValue(mockProduct);
+
+      // Act
+      const product = await controller.get(createdProductId);
+
+      // Assert
+      expect(product.id).toBe(createdProductId)
+      expect(spy).toHaveBeenCalledWith(createdProductId);
     });
   });
 });

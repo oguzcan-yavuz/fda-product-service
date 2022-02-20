@@ -12,7 +12,7 @@ import { getConnection } from 'typeorm';
 describe('ProductController (e2e)', () => {
   const productFactory = new ProductFactory();
   let app: INestApplication;
-  let prefix = '';
+  let baseUrl = '';
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -21,12 +21,13 @@ describe('ProductController (e2e)', () => {
 
     app = moduleFixture.createNestApplication(null, { bufferLogs: true });
     const configService: ConfigService = app.get(ConfigService);
-    prefix = configService.get('URL_PREFIX');
+    const prefix = configService.get('URL_PREFIX');
     const logger = app.get(Logger);
     app.setGlobalPrefix(prefix);
     app.useGlobalPipes(new ValidationPipe());
     app.useGlobalFilters(new AllExceptionsFilter(logger));
     app.useLogger(logger);
+    baseUrl = `/${prefix}/products`;
 
     await app.init();
   });
@@ -43,20 +44,18 @@ describe('ProductController (e2e)', () => {
   describe('products', () => {
     describe(`/products (POST)`, () => {
       it('should return bad request for empty object', async () => {
-        const url = `/${prefix}/products`;
         const dto = {};
 
-        await request(app.getHttpServer()).post(`${url}`).send(dto).expect(400);
+        await request(app.getHttpServer()).post(baseUrl).send(dto).expect(400);
       });
 
       it('should create the product', async () => {
-        const url = `/${prefix}/products`;
         const dto: CreateProductDto = {
           name: 'cool product',
         };
 
         const { body } = await request(app.getHttpServer())
-          .post(`${url}`)
+          .post(baseUrl)
           .send(dto)
           .expect(201);
 
@@ -67,14 +66,12 @@ describe('ProductController (e2e)', () => {
 
     describe(`/products (GET)`, () => {
       it('should return bad request if pagination is not specified', async () => {
-        const url = `/${prefix}/products`;
         const dto = {};
 
-        await request(app.getHttpServer()).get(`${url}`).query(dto).expect(400);
+        await request(app.getHttpServer()).get(baseUrl).query(dto).expect(400);
       });
 
       it('should return the last 5 products', async () => {
-        const url = `/${prefix}/products`;
         const dto = {
           limit: 5,
           offset: 5,
@@ -83,7 +80,7 @@ describe('ProductController (e2e)', () => {
         const lastFiveProducts = createdProducts.slice(5, 10);
 
         const { body: products } = await request(app.getHttpServer())
-          .get(`${url}`)
+          .get(baseUrl)
           .query(dto)
           .expect(200);
 
@@ -92,6 +89,34 @@ describe('ProductController (e2e)', () => {
           const createdProduct = lastFiveProducts[index];
           expect(product.id).toBe(createdProduct.id);
         });
+      });
+    });
+
+    describe('/products/:id (GET)', () => {
+      it('should return bad request if the id is invalid', async () => {
+        const id = 'invalid-id';
+        const url = `${baseUrl}/${id}`;
+
+        await request(app.getHttpServer()).get(url).expect(400);
+      });
+
+      it('should return not found if the product not exists', async () => {
+        const id = '1';
+        const url = `${baseUrl}/${id}`;
+
+        await request(app.getHttpServer()).get(url).expect(404);
+      });
+
+      it('should return the product', async () => {
+        const createdProduct = await productFactory.create();
+        const id = createdProduct.id;
+        const url = `${baseUrl}/${id}`;
+
+        const { body: product } = await request(app.getHttpServer())
+          .get(url)
+          .expect(200);
+
+        expect(product.id).toBe(id);
       });
     });
   });

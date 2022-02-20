@@ -72,4 +72,14 @@ describe('ProductRepository', () => {
       });
     });
   });
+
+  describe('get product', () => {
+    it('should get the product', async () => {
+      const createdProduct = await productFactory.create();
+
+      const product = await repository.findOne(createdProduct.id);
+
+      expect(product.id).toBe(createdProduct.id);
+    });
+  });
 });

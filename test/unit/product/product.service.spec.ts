@@ -7,6 +7,7 @@ import { getLoggerToken, PinoLogger } from 'nestjs-pino';
 import ExampleException from '../../../src/product/exceptions/example-exception';
 import { ListProductsDto } from '../../../src/product/dto/list-products.dto';
 import { ProductFactory } from '../../factory/product.factory';
+import { NotFoundException } from '@nestjs/common';
 
 describe('ProductService', () => {
   let service: ProductService;
@@ -30,6 +31,10 @@ describe('ProductService', () => {
 
     service = module.get<ProductService>(ProductService);
     repository = module.get<ProductRepository>(ProductRepository);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   describe('create()', () => {
@@ -86,6 +91,36 @@ describe('ProductService', () => {
       expect(spy).toHaveBeenCalledWith({
         take: pagination.limit,
         skip: pagination.offset,
+      });
+    });
+
+    describe('get()', () => {
+      it('should throw not found if the product not exists', async () => {
+        // Arrange
+        const id = 1;
+        jest.spyOn(repository, 'findOne').mockResolvedValue(undefined);
+
+        // Act
+        const fn = () => service.get(id);
+
+        // Assert
+        await expect(fn).rejects.toThrow(NotFoundException);
+      });
+
+      it('should return the product', async () => {
+        // Arrange
+        const mockProduct = await productFactory.make();
+        const createdProductId = mockProduct.id;
+        const spy = jest
+          .spyOn(repository, 'findOne')
+          .mockResolvedValue(mockProduct);
+
+        // Act
+        const product = await service.get(createdProductId);
+
+        // Assert
+        expect(product.id).toBe(mockProduct.id);
+        expect(spy).toHaveBeenCalledWith(createdProductId);
       });
     });
   });
