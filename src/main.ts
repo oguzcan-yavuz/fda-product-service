@@ -11,7 +11,9 @@ async function bootstrap() {
   const configService: ConfigService = app.get(ConfigService);
   const logger = app.get(Logger);
   app.setGlobalPrefix(configService.get('URL_PREFIX'));
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(
+    new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }),
+  );
   app.useGlobalFilters(new AllExceptionsFilter(logger));
   app.useLogger(logger);
   const swaggerConfig = new DocumentBuilder()

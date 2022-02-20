@@ -62,10 +62,10 @@ describe('ProductService', () => {
       const spy = jest.spyOn(repository, 'save').mockResolvedValue(mockProduct);
 
       // Act
-      const product = await service.create(productToCreate);
+      const createdProduct = await service.create(productToCreate);
 
       // Assert
-      expect(product).toBe(mockProduct);
+      expect(createdProduct).toBe(mockProduct);
       expect(spy).toHaveBeenCalledWith(productToCreate);
     });
   });
@@ -78,7 +78,6 @@ describe('ProductService', () => {
         offset: 0,
       };
       const mockProducts = await productFactory.makeMany(10);
-
       const spy = jest
         .spyOn(repository, 'find')
         .mockResolvedValue(mockProducts);
@@ -93,35 +92,71 @@ describe('ProductService', () => {
         skip: pagination.offset,
       });
     });
+  });
 
-    describe('get()', () => {
-      it('should throw not found if the product not exists', async () => {
-        // Arrange
-        const id = 1;
-        jest.spyOn(repository, 'findOne').mockResolvedValue(undefined);
+  describe('get()', () => {
+    it('should throw not found if the product not exists', async () => {
+      // Arrange
+      const id = 1;
+      jest.spyOn(repository, 'findOne').mockResolvedValue(undefined);
 
-        // Act
-        const fn = () => service.get(id);
+      // Act
+      const fn = () => service.get(id);
 
-        // Assert
-        await expect(fn).rejects.toThrow(NotFoundException);
-      });
+      // Assert
+      await expect(fn).rejects.toThrow(NotFoundException);
+    });
 
-      it('should return the product', async () => {
-        // Arrange
-        const mockProduct = await productFactory.make();
-        const createdProductId = mockProduct.id;
-        const spy = jest
-          .spyOn(repository, 'findOne')
-          .mockResolvedValue(mockProduct);
+    it('should return the product', async () => {
+      // Arrange
+      const mockProduct = await productFactory.make();
+      const mockProductId = mockProduct.id;
+      const spy = jest
+        .spyOn(repository, 'findOne')
+        .mockResolvedValue(mockProduct);
 
-        // Act
-        const product = await service.get(createdProductId);
+      // Act
+      const product = await service.get(mockProductId);
 
-        // Assert
-        expect(product.id).toBe(mockProduct.id);
-        expect(spy).toHaveBeenCalledWith(createdProductId);
-      });
+      // Assert
+      expect(product.id).toBe(mockProduct.id);
+      expect(spy).toHaveBeenCalledWith(mockProductId);
+    });
+  });
+
+  describe('update()', () => {
+    it('should throw not found if the product not exists', async () => {
+      // Arrange
+      const id = 1;
+      const updateBody = {
+        name: 'updated name',
+      };
+      jest.spyOn(repository, 'updateById').mockResolvedValue(undefined);
+
+      // Act
+      const fn = () => service.update(id, updateBody);
+
+      // Assert
+      await expect(fn).rejects.toThrow(NotFoundException);
+    });
+
+    it('should return the product', async () => {
+      // Arrange
+      const mockProduct = await productFactory.make();
+      const mockProductId = mockProduct.id;
+      const updateBody = {
+        name: 'updated name',
+      };
+      const spy = jest
+        .spyOn(repository, 'updateById')
+        .mockResolvedValue({ ...mockProduct, ...updateBody });
+
+      // Act
+      const updatedProduct = await service.update(mockProductId, updateBody);
+
+      // Assert
+      expect(updatedProduct.name).toBe(updateBody.name);
+      expect(spy).toHaveBeenCalledWith(mockProductId, updateBody);
     });
   });
 });

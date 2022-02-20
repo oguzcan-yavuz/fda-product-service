@@ -40,10 +40,10 @@ describe('ProductController', () => {
       const spy = jest.spyOn(service, 'create').mockResolvedValue(mockProduct);
 
       // Act
-      const product = await controller.create(createProductDto);
+      const createdProduct = await controller.create(createProductDto);
 
       // Assert
-      expect(product).toBe(mockProduct);
+      expect(createdProduct).toBe(mockProduct);
       expect(spy).toHaveBeenCalledWith(createProductDto);
     });
   });
@@ -71,15 +71,39 @@ describe('ProductController', () => {
     it('should return the product', async () => {
       // Arrange
       const mockProduct = await productFactory.make();
-      const createdProductId = mockProduct.id
+      const createdProductId = mockProduct.id;
       const spy = jest.spyOn(service, 'get').mockResolvedValue(mockProduct);
 
       // Act
       const product = await controller.get(createdProductId);
 
       // Assert
-      expect(product.id).toBe(createdProductId)
+      expect(product.id).toBe(createdProductId);
       expect(spy).toHaveBeenCalledWith(createdProductId);
+    });
+  });
+
+  describe('update()', () => {
+    it('should return the product', async () => {
+      // Arrange
+      const mockProduct = await productFactory.make();
+      const createdProductId = mockProduct.id;
+      const updateBody = {
+        name: 'updated name',
+      };
+      const spy = jest
+        .spyOn(service, 'update')
+        .mockResolvedValue({ ...mockProduct, ...updateBody });
+
+      // Act
+      const updatedProduct = await controller.update(
+        createdProductId,
+        updateBody,
+      );
+
+      // Assert
+      expect(updatedProduct.name).toBe(updateBody.name);
+      expect(spy).toHaveBeenCalledWith(createdProductId, updateBody);
     });
   });
 });

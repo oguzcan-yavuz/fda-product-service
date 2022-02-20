@@ -1,9 +1,19 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, Query } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { ProductEntity } from './product.entity';
 import { ProductService } from './product.service';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ListProductsDto } from './dto/list-products.dto';
+import { UpdateProductDto } from './dto/update-product.dto';
 
 @ApiTags('products')
 @Controller('products')
@@ -42,5 +52,18 @@ export class ProductController {
   })
   async get(@Param('id', ParseIntPipe) id: number): Promise<ProductEntity> {
     return this.productService.get(id);
+  }
+
+  @Patch(':id')
+  @ApiResponse({
+    status: 200,
+    description: 'Updates the product',
+    type: ProductEntity,
+  })
+  async update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateProductDto: UpdateProductDto,
+  ): Promise<ProductEntity> {
+    return this.productService.update(id, updateProductDto);
   }
 }

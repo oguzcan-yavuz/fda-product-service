@@ -1,8 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ProductRepository } from '../../../src/product/product.repository';
-import { ProductEntity } from '../../../src/product/product.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { getConnection, getRepository } from 'typeorm';
+import { getConnection } from 'typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { envVarsSchema } from '../../../src/config/env.schema';
 import { TypeOrmConfigService } from '../../../src/config/database';
@@ -23,12 +22,12 @@ describe('ProductRepository', () => {
           validationSchema: envVarsSchema,
         }),
         TypeOrmModule.forRootAsync({ useClass: TypeOrmConfigService }),
-        TypeOrmModule.forFeature([ProductEntity]),
+        TypeOrmModule.forFeature([ProductRepository]),
       ],
       providers: [ProductRepository],
     }).compile();
 
-    repository = getRepository<ProductEntity>(ProductEntity);
+    repository = module.get<ProductRepository>(ProductRepository);
   });
 
   beforeEach(async () => {
@@ -40,46 +39,19 @@ describe('ProductRepository', () => {
     await module.close();
   });
 
-  describe('create product', () => {
-    it('should create a product', async () => {
-      const product: Pick<ProductEntity, 'name'> = {
-        name: 'test product',
-      };
-
-      const savedProduct = await repository.save(product);
-
-      expect(typeof savedProduct.id).toBe('number');
-      expect(savedProduct.name).toBe(product.name);
-      expect(savedProduct.createdAt).toBeInstanceOf(Date);
-      expect(savedProduct.updatedAt).toBeInstanceOf(Date);
-    });
-  });
-
-  describe('list products', () => {
-    it('should list the products', async () => {
-      const pagination = {
-        take: 5,
-        skip: 10,
-      };
-      const createdProducts = await productFactory.createMany(17);
-      const paginatedProducts = createdProducts.slice(10, 15);
-
-      const products = await repository.find(pagination);
-
-      expect(products).toHaveLength(5);
-      products.forEach((product, index) => {
-        expect(product.id).toBe(paginatedProducts[index].id);
-      });
-    });
-  });
-
-  describe('get product', () => {
-    it('should get the product', async () => {
+  describe('update product', () => {
+    it('should update the product', async () => {
       const createdProduct = await productFactory.create();
+      const updateBody = {
+        name: 'updated name',
+      };
 
-      const product = await repository.findOne(createdProduct.id);
+      const updatedProduct = await repository.updateById(
+        createdProduct.id,
+        updateBody,
+      );
 
-      expect(product.id).toBe(createdProduct.id);
+      expect(updatedProduct.name).toBe(updateBody.name);
     });
   });
 });

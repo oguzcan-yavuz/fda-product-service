@@ -5,6 +5,7 @@ import { ProductEntity } from './product.entity';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 import ExampleException from './exceptions/example-exception';
 import { ListProductsDto } from './dto/list-products.dto';
+import { UpdateProductDto } from './dto/update-product.dto';
 
 @Injectable()
 export class ProductService {
@@ -36,6 +37,22 @@ export class ProductService {
 
   async get(productId: ProductEntity['id']): Promise<ProductEntity> {
     const product = await this.productRepository.findOne(productId);
+
+    if (!product) {
+      throw new NotFoundException();
+    }
+
+    return product;
+  }
+
+  async update(
+    productId: ProductEntity['id'],
+    updateBody: UpdateProductDto,
+  ): Promise<ProductEntity> {
+    const product = await this.productRepository.updateById(
+      productId,
+      updateBody,
+    );
 
     if (!product) {
       throw new NotFoundException();

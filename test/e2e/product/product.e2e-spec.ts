@@ -24,7 +24,9 @@ describe('ProductController (e2e)', () => {
     const prefix = configService.get('URL_PREFIX');
     const logger = app.get(Logger);
     app.setGlobalPrefix(prefix);
-    app.useGlobalPipes(new ValidationPipe());
+    app.useGlobalPipes(
+      new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }),
+    );
     app.useGlobalFilters(new AllExceptionsFilter(logger));
     app.useLogger(logger);
     baseUrl = `/${prefix}/products`;
@@ -117,6 +119,56 @@ describe('ProductController (e2e)', () => {
           .expect(200);
 
         expect(product.id).toBe(id);
+      });
+    });
+
+    describe('/products/:id (PATCH)', () => {
+      it('should return bad request if the id is invalid', async () => {
+        const id = 'invalid-id';
+        const url = `${baseUrl}/${id}`;
+        const body = {
+          name: 'updated name',
+        };
+
+        await request(app.getHttpServer()).patch(url).send(body).expect(400);
+      });
+
+      it('should return bad request if the payload is invalid', async () => {
+        const createdProduct = await productFactory.create();
+        const id = createdProduct.id;
+        const url = `${baseUrl}/${id}`;
+        const body = {
+          invalidKey: 'updated name',
+        };
+
+        await request(app.getHttpServer()).patch(url).send(body).expect(400);
+      });
+
+      it('should return not found if the product not exists', async () => {
+        const id = '1';
+        const url = `${baseUrl}/${id}`;
+        const body = {
+          name: 'updated name',
+        };
+
+        await request(app.getHttpServer()).patch(url).send(body).expect(404);
+      });
+
+      it('should update the product', async () => {
+        const createdProduct = await productFactory.create();
+        const id = createdProduct.id;
+        const url = `${baseUrl}/${id}`;
+        const body = {
+          name: 'updated name',
+        };
+
+        const { body: product } = await request(app.getHttpServer())
+          .patch(url)
+          .send(body)
+          .expect(200);
+
+        expect(product.id).toBe(id);
+        expect(product.name).toBe(body.name);
       });
     });
   });
