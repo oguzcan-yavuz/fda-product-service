@@ -72,8 +72,7 @@ describe('ProductService', () => {
         limit: 10,
         offset: 0,
       };
-      const length = pagination.limit - pagination.offset;
-      const mockProducts = await productFactory.makeMany(length);
+      const mockProducts = await productFactory.makeMany(10);
 
       const spy = jest
         .spyOn(repository, 'find')
@@ -83,7 +82,7 @@ describe('ProductService', () => {
       const products = await service.list(pagination);
 
       // Assert
-      expect(products).toHaveLength(length);
+      expect(products).toHaveLength(10);
       expect(spy).toHaveBeenCalledWith({
         take: pagination.limit,
         skip: pagination.offset,

@@ -58,18 +58,18 @@ describe('ProductRepository', () => {
   describe('list products', () => {
     it('should list the products', async () => {
       const pagination = {
-        take: 10,
-        skip: 0,
+        take: 5,
+        skip: 10,
       };
-      const length = pagination.take - pagination.skip;
-      await productFactory.createMany(pagination.take);
+      const createdProducts = await productFactory.createMany(17);
+      const paginatedProducts = createdProducts.slice(10, 15);
 
       const products = await repository.find(pagination);
 
-      expect(products).toHaveLength(length);
-      for (const product of products) {
-        expect(product.id).toBeDefined();
-      }
+      expect(products).toHaveLength(5);
+      products.forEach((product, index) => {
+        expect(product.id).toBe(paginatedProducts[index].id);
+      });
     });
   });
 });

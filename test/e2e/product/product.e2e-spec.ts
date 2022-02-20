@@ -73,24 +73,25 @@ describe('ProductController (e2e)', () => {
         await request(app.getHttpServer()).get(`${url}`).query(dto).expect(400);
       });
 
-      it('should return the products', async () => {
+      it('should return the last 5 products', async () => {
         const url = `/${prefix}/products`;
         const dto = {
-          limit: 10,
-          offset: 0,
+          limit: 5,
+          offset: 5,
         };
-        const length = dto.limit - dto.offset;
-        await productFactory.createMany(dto.limit);
+        const createdProducts = await productFactory.createMany(12);
+        const lastFiveProducts = createdProducts.slice(5, 10);
 
         const { body: products } = await request(app.getHttpServer())
           .get(`${url}`)
           .query(dto)
           .expect(200);
 
-        expect(products).toHaveLength(length);
-        for (const product of products) {
-          expect(product.id).toBeDefined();
-        }
+        expect(products).toHaveLength(5);
+        products.forEach((product, index) => {
+          const createdProduct = lastFiveProducts[index];
+          expect(product.id).toBe(createdProduct.id);
+        });
       });
     });
   });

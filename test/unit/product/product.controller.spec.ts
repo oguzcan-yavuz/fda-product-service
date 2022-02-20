@@ -51,15 +51,14 @@ describe('ProductController', () => {
         limit: 10,
         offset: 0,
       };
-      const length = listProductsDto.limit - listProductsDto.offset;
-      const mockProducts = await productFactory.makeMany(length);
+      const mockProducts = await productFactory.makeMany(10);
       const spy = jest.spyOn(service, 'list').mockResolvedValue(mockProducts);
 
       // Act
       const products = await controller.list(listProductsDto);
 
       // Assert
-      expect(products).toHaveLength(length);
+      expect(products).toHaveLength(10);
       expect(spy).toHaveBeenCalledWith(listProductsDto);
     });
   });
