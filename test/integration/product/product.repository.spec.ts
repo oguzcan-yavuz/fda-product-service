@@ -2,12 +2,14 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ProductRepository } from '../../../src/product/product.repository';
 import { ProductEntity } from '../../../src/product/product.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { getRepository } from 'typeorm';
+import { getConnection, getRepository } from 'typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { envVarsSchema } from '../../../src/config/env.schema';
 import { TypeOrmConfigService } from '../../../src/config/database';
+import { ProductFactory } from '../../factory/product.factory';
 
 describe('ProductRepository', () => {
+  const productFactory = new ProductFactory();
   let repository: ProductRepository;
   let module: TestingModule;
 
@@ -27,6 +29,11 @@ describe('ProductRepository', () => {
     }).compile();
 
     repository = getRepository<ProductEntity>(ProductEntity);
+  });
+
+  beforeEach(async () => {
+    // clear the tables before every test
+    await getConnection().synchronize(true);
   });
 
   afterAll(async () => {
@@ -54,13 +61,14 @@ describe('ProductRepository', () => {
         take: 10,
         skip: 0,
       };
+      const length = pagination.take - pagination.skip;
+      await productFactory.createMany(pagination.take);
+
       const products = await repository.find(pagination);
 
-      expect(products).toHaveLength(pagination.take);
+      expect(products).toHaveLength(length);
       for (const product of products) {
-        for (const property in ProductEntity) {
-          expect(product).toHaveProperty(property);
-        }
+        expect(product.id).toBeDefined();
       }
     });
   });

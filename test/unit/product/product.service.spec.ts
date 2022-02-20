@@ -6,16 +6,12 @@ import { ProductEntity } from '../../../src/product/product.entity';
 import { getLoggerToken, PinoLogger } from 'nestjs-pino';
 import ExampleException from '../../../src/product/exceptions/example-exception';
 import { ListProductsDto } from '../../../src/product/dto/list-products.dto';
+import { ProductFactory } from '../../factory/product.factory';
 
 describe('ProductService', () => {
   let service: ProductService;
   let repository: ProductRepository;
-  const mockProductEntity: ProductEntity = {
-    id: 1,
-    name: 'some product',
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
+  const productFactory = new ProductFactory();
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -42,10 +38,8 @@ describe('ProductService', () => {
       const productToCreate: Pick<ProductEntity, 'name'> = {
         name: 'error test',
       };
-      jest.spyOn(repository, 'save').mockResolvedValue({
-        ...mockProductEntity,
-        name: productToCreate.name,
-      });
+      const mockProduct = await productFactory.make(productToCreate);
+      jest.spyOn(repository, 'save').mockResolvedValue(mockProduct);
 
       // Act
       const fn = () => service.create(productToCreate);
@@ -59,15 +53,14 @@ describe('ProductService', () => {
       const productToCreate: Pick<ProductEntity, 'name'> = {
         name: 'some product',
       };
-      const spy = jest
-        .spyOn(repository, 'save')
-        .mockResolvedValue(mockProductEntity);
+      const mockProduct = await productFactory.make(productToCreate);
+      const spy = jest.spyOn(repository, 'save').mockResolvedValue(mockProduct);
 
       // Act
       const product = await service.create(productToCreate);
 
       // Assert
-      expect(product).toBe(mockProductEntity);
+      expect(product).toBe(mockProduct);
       expect(spy).toHaveBeenCalledWith(productToCreate);
     });
   });
@@ -79,19 +72,18 @@ describe('ProductService', () => {
         limit: 10,
         offset: 0,
       };
-      const mockProductEntities = [...Array(pagination.limit)].map(
-        () => mockProductEntity,
-      );
+      const length = pagination.limit - pagination.offset;
+      const mockProducts = await productFactory.makeMany(length);
 
       const spy = jest
         .spyOn(repository, 'find')
-        .mockResolvedValue(mockProductEntities);
+        .mockResolvedValue(mockProducts);
 
       // Act
       const products = await service.list(pagination);
 
       // Assert
-      expect(products).toHaveLength(pagination.limit);
+      expect(products).toHaveLength(length);
       expect(spy).toHaveBeenCalledWith({
         take: pagination.limit,
         skip: pagination.offset,

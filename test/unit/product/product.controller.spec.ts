@@ -3,18 +3,13 @@ import { ProductController } from '../../../src/product/product.controller';
 import { CreateProductDto } from '../../../src/product/dto/create-product.dto';
 import { ProductService } from '../../../src/product/product.service';
 import { mock } from 'ts-mockito';
-import { ProductEntity } from '../../../src/product/product.entity';
 import { ListProductsDto } from '../../../src/product/dto/list-products.dto';
+import { ProductFactory } from '../../factory/product.factory';
 
 describe('ProductController', () => {
   let controller: ProductController;
   let service: ProductService;
-  const mockProductEntity: ProductEntity = {
-    id: 1,
-    name: 'some product',
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
+  const productFactory = new ProductFactory();
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -37,15 +32,14 @@ describe('ProductController', () => {
       const createProductDto: CreateProductDto = {
         name: 'some product',
       };
-      const spy = jest
-        .spyOn(service, 'create')
-        .mockResolvedValue(mockProductEntity);
+      const mockProduct = await productFactory.make(createProductDto);
+      const spy = jest.spyOn(service, 'create').mockResolvedValue(mockProduct);
 
       // Act
       const product = await controller.create(createProductDto);
 
       // Assert
-      expect(product).toBe(mockProductEntity);
+      expect(product).toBe(mockProduct);
       expect(spy).toHaveBeenCalledWith(createProductDto);
     });
   });
@@ -57,18 +51,15 @@ describe('ProductController', () => {
         limit: 10,
         offset: 0,
       };
-      const mockProductEntities = [...Array(listProductsDto.limit)].map(
-        () => mockProductEntity,
-      );
-      const spy = jest
-        .spyOn(service, 'list')
-        .mockResolvedValue(mockProductEntities);
+      const length = listProductsDto.limit - listProductsDto.offset;
+      const mockProducts = await productFactory.makeMany(length);
+      const spy = jest.spyOn(service, 'list').mockResolvedValue(mockProducts);
 
       // Act
       const products = await controller.list(listProductsDto);
 
       // Assert
-      expect(products).toHaveLength(listProductsDto.limit);
+      expect(products).toHaveLength(length);
       expect(spy).toHaveBeenCalledWith(listProductsDto);
     });
   });

@@ -6,9 +6,11 @@ import { CreateProductDto } from '../../../src/product/dto/create-product.dto';
 import { ConfigService } from '@nestjs/config';
 import { AllExceptionsFilter } from '../../../src/all-exceptions.filter';
 import { Logger } from 'nestjs-pino';
-import { ProductEntity } from '../../../src/product/product.entity';
+import { ProductFactory } from '../../factory/product.factory';
+import { getConnection } from 'typeorm';
 
 describe('ProductController (e2e)', () => {
+  const productFactory = new ProductFactory();
   let app: INestApplication;
   let prefix = '';
 
@@ -27,6 +29,11 @@ describe('ProductController (e2e)', () => {
     app.useLogger(logger);
 
     await app.init();
+  });
+
+  beforeEach(async () => {
+    // clear the tables before every test
+    await getConnection().synchronize(true);
   });
 
   afterAll(async () => {
@@ -72,17 +79,17 @@ describe('ProductController (e2e)', () => {
           limit: 10,
           offset: 0,
         };
+        const length = dto.limit - dto.offset;
+        await productFactory.createMany(dto.limit);
 
-        const { body } = await request(app.getHttpServer())
+        const { body: products } = await request(app.getHttpServer())
           .get(`${url}`)
           .query(dto)
           .expect(200);
 
-        expect(body).toHaveLength(dto.limit);
-        for (const product of body) {
-          for (const property in ProductEntity) {
-            expect(product).toHaveProperty(property);
-          }
+        expect(products).toHaveLength(length);
+        for (const product of products) {
+          expect(product.id).toBeDefined();
         }
       });
     });
