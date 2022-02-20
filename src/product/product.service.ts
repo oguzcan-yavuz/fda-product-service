@@ -4,6 +4,7 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { ProductEntity } from './product.entity';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 import ExampleException from './exceptions/example-exception';
+import { ListProductsDto } from './dto/list-products.dto';
 
 @Injectable()
 export class ProductService {
@@ -13,14 +14,23 @@ export class ProductService {
     private readonly logger: PinoLogger,
   ) {}
 
-  async create(productDetails: CreateProductDto): Promise<ProductEntity> {
-    const productEntity = await this.productRepository.save(productDetails);
+  async create(createProductDto: CreateProductDto): Promise<ProductEntity> {
+    const product = await this.productRepository.save(createProductDto);
 
     // for demo purposes, will replace this with a more meaningful business logic exception
-    if (productEntity.name === 'error test') {
+    if (product.name === 'error test') {
       throw new ExampleException();
     }
 
-    return productEntity;
+    return product;
+  }
+
+  async list({ limit, offset }: ListProductsDto): Promise<ProductEntity[]> {
+    const products = await this.productRepository.find({
+      take: limit,
+      skip: offset,
+    });
+
+    return products;
   }
 }

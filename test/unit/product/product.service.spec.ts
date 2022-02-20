@@ -5,6 +5,7 @@ import { mock } from 'ts-mockito';
 import { ProductEntity } from '../../../src/product/product.entity';
 import { getLoggerToken, PinoLogger } from 'nestjs-pino';
 import ExampleException from '../../../src/product/exceptions/example-exception';
+import { ListProductsDto } from '../../../src/product/dto/list-products.dto';
 
 describe('ProductService', () => {
   let service: ProductService;
@@ -35,7 +36,7 @@ describe('ProductService', () => {
     repository = module.get<ProductRepository>(ProductRepository);
   });
 
-  describe('createProduct()', () => {
+  describe('create()', () => {
     it('should throw when the test exception is triggered', async () => {
       // Arrange
       const productToCreate: Pick<ProductEntity, 'name'> = {
@@ -68,6 +69,33 @@ describe('ProductService', () => {
       // Assert
       expect(product).toBe(mockProductEntity);
       expect(spy).toHaveBeenCalledWith(productToCreate);
+    });
+  });
+
+  describe('list()', () => {
+    it('should list the products', async () => {
+      // Arrange
+      const pagination: ListProductsDto = {
+        limit: 10,
+        offset: 0,
+      };
+      const mockProductEntities = [...Array(pagination.limit)].map(
+        () => mockProductEntity,
+      );
+
+      const spy = jest
+        .spyOn(repository, 'find')
+        .mockResolvedValue(mockProductEntities);
+
+      // Act
+      const products = await service.list(pagination);
+
+      // Assert
+      expect(products).toHaveLength(pagination.limit);
+      expect(spy).toHaveBeenCalledWith({
+        take: pagination.limit,
+        skip: pagination.offset,
+      });
     });
   });
 });

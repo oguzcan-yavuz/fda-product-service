@@ -6,6 +6,7 @@ import { CreateProductDto } from '../../../src/product/dto/create-product.dto';
 import { ConfigService } from '@nestjs/config';
 import { AllExceptionsFilter } from '../../../src/all-exceptions.filter';
 import { Logger } from 'nestjs-pino';
+import { ProductEntity } from '../../../src/product/product.entity';
 
 describe('ProductController (e2e)', () => {
   let app: INestApplication;
@@ -54,6 +55,35 @@ describe('ProductController (e2e)', () => {
 
         expect(typeof body.id).toBe('number');
         expect(body.name).toBe(dto.name);
+      });
+    });
+
+    describe(`/products (GET)`, () => {
+      it('should return bad request if pagination is not specified', async () => {
+        const url = `/${prefix}/products`;
+        const dto = {};
+
+        await request(app.getHttpServer()).get(`${url}`).query(dto).expect(400);
+      });
+
+      it('should return the products', async () => {
+        const url = `/${prefix}/products`;
+        const dto = {
+          limit: 10,
+          offset: 0,
+        };
+
+        const { body } = await request(app.getHttpServer())
+          .get(`${url}`)
+          .query(dto)
+          .expect(200);
+
+        expect(body).toHaveLength(dto.limit);
+        for (const product of body) {
+          for (const property in ProductEntity) {
+            expect(product).toHaveProperty(property);
+          }
+        }
       });
     });
   });

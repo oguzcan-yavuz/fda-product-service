@@ -47,4 +47,21 @@ describe('ProductRepository', () => {
       expect(savedProduct.updatedAt).toBeInstanceOf(Date);
     });
   });
+
+  describe('list products', () => {
+    it('should list the products', async () => {
+      const pagination = {
+        take: 10,
+        skip: 0,
+      };
+      const products = await repository.find(pagination);
+
+      expect(products).toHaveLength(pagination.take);
+      for (const product of products) {
+        for (const property in ProductEntity) {
+          expect(product).toHaveProperty(property);
+        }
+      }
+    });
+  });
 });

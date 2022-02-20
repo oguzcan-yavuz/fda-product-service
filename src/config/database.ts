@@ -1,8 +1,6 @@
-import { ConnectionOptions } from 'typeorm';
 import { TypeOrmModuleOptions, TypeOrmOptionsFactory } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
 import * as path from 'path';
-import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 
 @Injectable()
 export class TypeOrmConfigService implements TypeOrmOptionsFactory {
@@ -20,7 +18,7 @@ export class TypeOrmConfigService implements TypeOrmOptionsFactory {
     } = process;
     const isTestEnvironment = NODE_ENV === 'test';
 
-    const configuration: ConnectionOptions = {
+    const configuration: TypeOrmModuleOptions = {
       type: TYPEORM_CONNECTION as 'postgres',
       username: TYPEORM_USERNAME,
       password: TYPEORM_PASSWORD,
