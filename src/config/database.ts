@@ -30,7 +30,6 @@ export class TypeOrmConfigService implements TypeOrmOptionsFactory {
         ? global.__TESTCONTAINERS_POSTGRES_PORT_5432__
         : TYPEORM_PORT,
       synchronize: isTestEnvironment,
-      migrationsRun: isTestEnvironment,
       entities: isTestEnvironment
         ? [path.resolve(__dirname, '..', '**', '*.entity{.ts,.js}')]
         : ['dist/**/*.entity{.ts,.js}'],
