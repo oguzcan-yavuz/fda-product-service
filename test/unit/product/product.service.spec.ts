@@ -8,6 +8,7 @@ import ExampleException from '../../../src/product/exceptions/example-exception'
 import { ListProductsDto } from '../../../src/product/dto/list-products.dto';
 import { ProductFactory } from '../../factory/product.factory';
 import { NotFoundException } from '@nestjs/common';
+import { UpdateResult } from 'typeorm';
 
 describe('ProductService', () => {
   let service: ProductService;
@@ -157,6 +158,46 @@ describe('ProductService', () => {
       // Assert
       expect(updatedProduct.name).toBe(updateBody.name);
       expect(spy).toHaveBeenCalledWith(mockProductId, updateBody);
+    });
+  });
+
+  describe('delete()', () => {
+    it('should throw not found if the product not exists', async () => {
+      // Arrange
+      const id = 1;
+      const mockUpdateResult: UpdateResult = {
+        raw: [],
+        affected: 0,
+        generatedMaps: [],
+      };
+      jest.spyOn(repository, 'softDelete').mockResolvedValue(mockUpdateResult);
+
+      // Act
+      const fn = () => service.delete(id);
+
+      // Assert
+      await expect(fn).rejects.toThrow(NotFoundException);
+    });
+
+    it('should delete the product', async () => {
+      // Arrange
+      const mockProduct = await productFactory.make();
+      const mockProductId = mockProduct.id;
+      const mockUpdateResult: UpdateResult = {
+        raw: [],
+        affected: 1,
+        generatedMaps: [],
+      };
+      const spy = jest
+        .spyOn(repository, 'softDelete')
+        .mockResolvedValue(mockUpdateResult);
+
+      // Act
+      const fn = () => service.delete(mockProductId);
+
+      // Assert
+      await expect(fn()).resolves.not.toThrow();
+      expect(spy).toHaveBeenCalledWith(mockProductId);
     });
   });
 });

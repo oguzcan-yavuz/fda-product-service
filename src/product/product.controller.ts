@@ -1,7 +1,10 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   ParseIntPipe,
   Patch,
@@ -65,5 +68,15 @@ export class ProductController {
     @Body() updateProductDto: UpdateProductDto,
   ): Promise<ProductEntity> {
     return this.productService.update(id, updateProductDto);
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiResponse({
+    status: 204,
+    description: 'Soft deletes the product',
+  })
+  async delete(@Param('id', ParseIntPipe) id: number): Promise<void> {
+    return this.productService.delete(id);
   }
 }

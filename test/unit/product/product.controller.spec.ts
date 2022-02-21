@@ -106,4 +106,20 @@ describe('ProductController', () => {
       expect(spy).toHaveBeenCalledWith(createdProductId, updateBody);
     });
   });
+
+  describe('delete()', () => {
+    it('should return empty', async () => {
+      // Arrange
+      const mockProduct = await productFactory.make();
+      const createdProductId = mockProduct.id;
+      const spy = jest.spyOn(service, 'delete').mockResolvedValue(undefined);
+
+      // Act
+      const fn = () => controller.delete(createdProductId);
+
+      // Assert
+      await expect(fn()).resolves.not.toThrow();
+      expect(spy).toHaveBeenCalledWith(createdProductId);
+    });
+  });
 });

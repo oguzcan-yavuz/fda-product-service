@@ -171,5 +171,31 @@ describe('ProductController (e2e)', () => {
         expect(product.name).toBe(body.name);
       });
     });
+
+    describe('/products/:id (DELETE)', () => {
+      it('should return bad request if the id is invalid', async () => {
+        const id = 'invalid-id';
+        const url = `${baseUrl}/${id}`;
+
+        await request(app.getHttpServer()).delete(url).expect(400);
+      });
+
+      it('should return not found if the product not exists', async () => {
+        const id = '1';
+        const url = `${baseUrl}/${id}`;
+
+        await request(app.getHttpServer()).delete(url).expect(404);
+      });
+
+      it('should delete the product', async () => {
+        const createdProduct = await productFactory.create();
+        const id = createdProduct.id;
+        const url = `${baseUrl}/${id}`;
+
+        await request(app.getHttpServer()).delete(url).expect(204);
+
+        await request(app.getHttpServer()).get(url).expect(404);
+      });
+    });
   });
 });

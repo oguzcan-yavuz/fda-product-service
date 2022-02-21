@@ -60,4 +60,12 @@ export class ProductService {
 
     return product;
   }
+
+  async delete(productId: ProductEntity['id']): Promise<void> {
+    const { affected } = await this.productRepository.softDelete(productId);
+
+    if (affected === 0) {
+      throw new NotFoundException();
+    }
+  }
 }
