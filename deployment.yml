@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fda-product-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fda-product-service
+  template:
+    metadata:
+      labels:
+        app: fda-product-service
+    spec:
+      containers:
+        - name: fda-product-service
+          image: yavuzovski/fda-product-service:latest
+          env:
+            - name: NODE_ENV
+              value: "production"
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: fda-product-service-lb
+spec:
+  selector:
+    app: fda-product-service
+  type: LoadBalancer
+  ports:
+    - port: 80
+      targetPort: 3000
