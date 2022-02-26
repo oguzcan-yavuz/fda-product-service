@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: fda-product-service
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: fda-product-service
