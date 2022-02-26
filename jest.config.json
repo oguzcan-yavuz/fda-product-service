@@ -12,6 +12,6 @@
     "!src/**/*.model.ts",
     "!src/**/*.module.ts"
   ],
-  "coverageDirectory": "../coverage",
+  "coverageDirectory": "coverage",
   "testEnvironment": "node"
 }
